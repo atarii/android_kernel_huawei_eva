@@ -62,11 +62,17 @@ typedef struct _tag_hisp_info {
 	char name[HISP_NAME_SIZE];
 } hisp_info_t;
 
+typedef struct _hisp_system_time_t{
+    struct timeval s_timeval;
+    unsigned int s_system_couter_rate;
+    unsigned long long s_system_counter;
+
+}hisp_system_time_t;
 
 #define HISP_IOCTL_POWER_ON   _IO('A', BASE_VIDIOC_PRIVATE + 0x01)
 #define HISP_IOCTL_POWER_OFF  _IO('A', BASE_VIDIOC_PRIVATE + 0x02)
 #define HISP_IOCTL_GET_INFO   _IOR('A', BASE_VIDIOC_PRIVATE + 0x05, hisp_info_t)
 #define HISP_IOCTL_CFG_ISP    _IOWR('A', BASE_VIDIOC_PRIVATE + 0x06, \
 				struct hisp_cfg_data)
-
+#define HISP_IOCTL_GET_SYSTEM_TIME   _IOR('A', BASE_VIDIOC_PRIVATE + 0x07, hisp_system_time_t)
 #endif /* __HW_KERNEL_HWCAM_HISP_CFG_BASE_H__ */

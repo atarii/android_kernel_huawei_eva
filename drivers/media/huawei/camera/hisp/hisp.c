@@ -1,8 +1,13 @@
 
 
 //lint -save -e7
-#ifdef CHICAGO_CAMERA
+//lint -save -e30 -e142 -e613 -e429
+#if defined( CHICAGO_CAMERA  )
 #include <media/huawei/hisp150_cfg.h>
+#elif defined( BOSTON_ES_CAMERA)
+#include <media/huawei/hisp160es_cfg.h>
+#elif defined( BOSTON_CAMERA  )
+#include <media/huawei/hisp160_cfg.h>
 #else
 #include <media/huawei/hisp_cfg.h>
 #endif
@@ -134,7 +139,6 @@ hisp_subdev_get_system_timestamp(hisp_system_time_t* hisp_system_time )
     hisp_system_time->s_system_couter_rate = arch_timer_get_rate();
     do_gettimeofday(&(hisp_system_time->s_timeval));
 }
-
 /*Function declaration */
 /**********************************************
  *ioctl function for v4l2 subdev
@@ -176,10 +180,10 @@ hisp_vo_subdev_ioctl(struct v4l2_subdev *sd, unsigned int cmd, void *arg)
 		/* cam_info("Enter HISP_IOCTL_POWER_ON!\n"); */
 		/* rc = isp->hw->vtbl->power_on(isp->hw); */
 		break;
-	case HISP_IOCTL_GET_SYSTEM_TIME:
-	        cam_info("Enter HISP_IOCTL_GET_SYSTEM_TIME!\n");
-	        hisp_subdev_get_system_timestamp((hisp_system_time_t*) arg);
-	        break;
+    case HISP_IOCTL_GET_SYSTEM_TIME:
+        cam_info("Enter HISP_IOCTL_GET_SYSTEM_TIME!\n");
+        hisp_subdev_get_system_timestamp((hisp_system_time_t*) arg);
+        break;
 	case HISP_IOCTL_POWER_OFF:
 		/* cam_info("Enter HISP_IOCTL_POWER_OFF!\n"); */
 		/* rc = isp->hw->vtbl->power_off(isp->hw); */
@@ -238,22 +242,22 @@ int hisp_get_dt_data(struct platform_device *pdev, hisp_dt_data_t *dt)
 {
 	int ret = 0;
 	struct device *dev = NULL;
-	struct device_node *of_node = NULL;
-	int is_fpga = 0;
+	struct device_node *dev_node = NULL;
+	unsigned int is_fpga = 0;
 	const char *clk_name = NULL;
 	if (NULL == pdev || NULL == dt) {
 		cam_err("%s: pdev or dt is NULL.", __func__);
 		return -1;
 	}
 	dev = &pdev->dev;
-	of_node = dev->of_node;
+	dev_node = dev->of_node;
 
-	if (NULL == of_node) {
+	if (NULL == dev_node) {
 		cam_err("%s: of node NULL.", __func__);
 		return -1;
 	}
 
-	ret = of_property_read_u32(of_node, "hisi,is_fpga", &is_fpga);
+	ret = of_property_read_u32(dev_node, "hisi,is_fpga", &is_fpga);
 	if (ret < 0) {
 		cam_err("%s: get FPGA flag failed.", __func__);
 	}
@@ -263,7 +267,7 @@ int hisp_get_dt_data(struct platform_device *pdev, hisp_dt_data_t *dt)
 		return 0;
 	}
 
-	ret = of_property_read_string_index(of_node, "clock-names", 0, &clk_name);
+	ret = of_property_read_string_index(dev_node, "clock-names", 0, &clk_name);
 	cam_info("%s: clk(%s)", __func__, clk_name);
 	if (ret < 0) {
 		cam_err("%s: could not get aclk name.", __func__);
@@ -277,7 +281,7 @@ int hisp_get_dt_data(struct platform_device *pdev, hisp_dt_data_t *dt)
 		goto err_aclk;
 	}
 
-	ret = of_property_read_string_index(of_node, "clock-names", 1, &clk_name);
+	ret = of_property_read_string_index(dev_node, "clock-names", 1, &clk_name);
 	cam_info("%s: clk(%s)", __func__, clk_name);
 	if (ret < 0) {
 		cam_err("%s: could not get aclk_dss name.", __func__);
@@ -291,7 +295,7 @@ int hisp_get_dt_data(struct platform_device *pdev, hisp_dt_data_t *dt)
 		goto err_aclk;
 	}
 
-	ret = of_property_read_string_index(of_node, "clock-names", 2, &clk_name);
+	ret = of_property_read_string_index(dev_node, "clock-names", 2, &clk_name);
 	cam_info("%s: clk(%s)", __func__, clk_name);
 	if (ret < 0) {
 		cam_err("%s: could not get pclk_dss name.", __func__);
